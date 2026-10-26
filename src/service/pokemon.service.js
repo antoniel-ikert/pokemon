@@ -1,16 +1,63 @@
-import pool from "../config/db.js";
+   
+import db from '../config/db.js';
 
 class PokemonService {
+  async createTreinador(nome) {
+    const [treinador] = await db('treinadores').insert({ nome }).returning('*');
+    return treinador;
+  }
+
+  async getAllTreinadores() {
+    return await db('treinadores').select('*');
+  }
+
+  async createPokemon(dados) {
+    const [pokemon] = await db('pokemons').insert(dados).returning('*');
+    return pokemon;
+  }
+
   async getAllPokemons() {
-    const query = "SELECT * FROM pokemons";
-    const result = await pool.query(query);
-    return result.rows;
+    return await db('pokemons')
+      .join('treinadores', 'pokemons.treinador_id', 'treinadores.id')
+      .select(
+        'pokemons.id',
+        'pokemons.nome',
+        'pokemons.nivel',
+        'pokemons.tipo',
+        'treinadores.nome as treinador'
+      );
+  }
+
+  async getPokemonById(id) {
+    return await db('pokemons').where({ id }).first();
+  }
+
+  async updatePut(id, dados) {
+    const [pokemon] = await db('pokemons')
+      .where({ id })
+      .update({
+        nome: dados.nome,
+        nivel: dados.nivel,
+        tipo: dados.tipo,
+        treinador_id: dados.treinador_id
+      })
+      .returning('*');
+    return pokemon;
+  }
+
+  async updatePatch(id, dados) {
+    const [pokemon] = await db('pokemons')
+      .where({ id })
+      .update(dados)
+      .returning('*');
+    return pokemon;
+  }
+
+
+  async deletePokemon(id) {
+    return await db('pokemons').where({ id }).del();
   }
 }
 
-async function getPokemonById(id) {
-  const query = "SELECT * FROM pokemons WHERE id = $1";
-  const result = await pool.query(query, [id]); 
-    return result.rows[0];
-}   
+export default new PokemonService();
  

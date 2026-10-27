@@ -1,4 +1,3 @@
-   
 import db from '../config/db.js';
 
 class PokemonService {
@@ -52,7 +51,6 @@ class PokemonService {
       .returning('*');
     return pokemon;
   }
-
 
   async deletePokemon(id) {
     return await db('pokemons').where({ id }).del();

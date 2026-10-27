@@ -1,59 +1,37 @@
-import db from '../config/db.js';
+import pokemonRepository from '../repositories/pokemon.repository.js';
+import treinadorRepository from '../repositories/treinador.repository.js';
 
 class PokemonService {
   async createTreinador(nome) {
-    const [treinador] = await db('treinadores').insert({ nome }).returning('*');
-    return treinador;
+    return await treinadorRepository.create(nome);
   }
 
   async getAllTreinadores() {
-    return await db('treinadores').select('*');
+    return await treinadorRepository.getAll();
   }
 
   async createPokemon(dados) {
-    const [pokemon] = await db('pokemons').insert(dados).returning('*');
-    return pokemon;
+    return await pokemonRepository.create(dados);
   }
 
   async getAllPokemons() {
-    return await db('pokemons')
-      .join('treinadores', 'pokemons.treinador_id', 'treinadores.id')
-      .select(
-        'pokemons.id',
-        'pokemons.nome',
-        'pokemons.nivel',
-        'pokemons.tipo',
-        'treinadores.nome as treinador'
-      );
+    return await pokemonRepository.getAll();
   }
 
   async getPokemonById(id) {
-    return await db('pokemons').where({ id }).first();
+    return await pokemonRepository.getById(id);
   }
 
   async updatePut(id, dados) {
-    const [pokemon] = await db('pokemons')
-      .where({ id })
-      .update({
-        nome: dados.nome,
-        nivel: dados.nivel,
-        tipo: dados.tipo,
-        treinador_id: dados.treinador_id
-      })
-      .returning('*');
-    return pokemon;
+    return await pokemonRepository.updatePut(id, dados);
   }
 
   async updatePatch(id, dados) {
-    const [pokemon] = await db('pokemons')
-      .where({ id })
-      .update(dados)
-      .returning('*');
-    return pokemon;
+    return await pokemonRepository.updatePatch(id, dados);
   }
 
   async deletePokemon(id) {
-    return await db('pokemons').where({ id }).del();
+    return await pokemonRepository.delete(id);
   }
 }
 
